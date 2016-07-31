@@ -15,7 +15,7 @@ gulp.task('html2enml_build', function () {
         .bundle()
         .pipe(source('html2enml_only.js'))
         .pipe(buffer())
-        //.pipe(uglify())
+        .pipe(uglify())
         .pipe(concat('html2enml_only.js'))
         .pipe(gulp.dest('./dest/js'));
 });
@@ -32,7 +32,7 @@ gulp.task('app_build', function () {
         .bundle()
         .pipe(source('app_only.js'))
         .pipe(buffer())
-        //.pipe(uglify())
+        .pipe(uglify())
         .pipe(concat('app_only.js'))
         .pipe(gulp.dest('./dest/js'));
 });
