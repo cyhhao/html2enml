@@ -36,10 +36,8 @@ class Gdict {
 class html2enml {
     constructor() {
         this.parser = new cssjs();
-    }
-
-    highlightLoad() {
-        hljs.initHighlightingOnLoad();
+        this.allowTags=["html","a","abbr","acronym","address","area","b","bdo","big","blockquote","br","caption","center","cite","code","col","colgroup","dd","del","dfn","div","dl","dt","em","font","h1","h2","h3","h4","h5","h6","hr","i","img","ins","kbd","li","map","ol","p","pre","q","s","samp","small","span","strike","strong","sub","sup","table","tbody","td","tfoot","th","thead","title","tr","tt","u","ul","var","xmp","en-media","en-todo","en-note"];
+        this.allowAttrs=["style","name","href","src","alt"];
     }
 
 
@@ -50,10 +48,74 @@ class html2enml {
         styles.remove();
     }
 
+    transCssByAllLink(finishCallback) {
+        let that = this;
+        let AllLink = $('link[type="text/css"]');
+        let all_data = '';
+        let count = 0;
 
+        function callback(data) {
+            all_data += '\n' + data;
+
+            if (count + 1 === AllLink.length) {
+                //console.log(all_data);
+                that.transCssByString(all_data)
+                finishCallback()
+            }
+            count++;
+
+        }
+
+        function next(i) {
+            if (i === AllLink.length) {
+                return callback;
+            }
+            let dom = AllLink[i];
+            $(dom).remove();
+            let url = dom.href;
+            $.get(url, next(i + 1));
+            return callback
+        }
+
+        next(0);
+    }
+
+    //transCanvas2Background() {
+    //    let canvass = $('canvas');
+    //    canvass.each(function(){
+    //        //console.log(this);
+    //        let data = this.toDataURL("image/png");
+    //        let it = $(this);
+    //        let img = $('<div/>');
+    //        img.attr('style', it.attr('style'));
+    //        img.attr('class', it.attr('class'));
+    //        img.css('width', it.attr('width') + 'px');
+    //        img.css('height', it.attr('height') + 'px');
+    //        img.css('background', 'url(' + data + ')');
+    //
+    //        it.after(img);
+    //        it.remove()
+    //    })
+    //}
+    transCanvas2Background() {
+        let canvass = $('canvas');
+        canvass.each(function(){
+            let data = this.toDataURL("image/png");
+            let it = $(this);
+            let img = $('<img/>');
+            img.attr('style', it.attr('style'));
+            img.attr('class', it.attr('class'));
+            img.css('width', it.attr('width') + 'px');
+            img.css('height', it.attr('height') + 'px');
+            img.attr('src', data);
+
+            it.after(img);
+            it.remove()
+        })
+    }
 
     start() {
-        let that=this;
+        let that = this;
         setTimeout(function () {
             that.transCssByAllStyle();
             that.clearAllClass();
@@ -140,6 +202,15 @@ class html2enml {
         it.remove();
     }
 
+    transCssByLink(dom) {
+        let url = dom.href;
+        let that = this;
+        $.get(url, function (data) {
+            that.transCssByString(data);
+            $(dom).remove();
+        })
+    }
+
     transBody() {
         let body = $('body');
         let head = $('head');
@@ -151,15 +222,45 @@ class html2enml {
         body.after(note);
         body.remove();
 
-        console.log(123)
+        //console.log(123)
     }
 
     clearAllClass() {
         $('[class]').removeAttr('class');
     }
 
-    clearAllImg() {
-        $('img').remove();
+    clearAllUnAllow(tagWhiteList,attrWhiteList,replace) {
+        let that=this;
+        function dg(node){
+            let thisNode=$(node);
+            //console.log(node.tagName.toLowerCase());
+            if(that.allowTags.indexOf(node.tagName.toLowerCase())>=0){
+                //console.log('pass')
+                for(let i=0;i<node.attributes.length;i++){
+                    let attr=node.attributes[i];
+                    if(that.allowAtclearAllUnAllowtrs.indexOf(attr.name.toLowerCase())>=0){
+
+                    }
+                    else{
+                        thisNode.removeAttr(attr.name)
+                    }
+                }
+                for(let child of thisNode.children()){
+                    //console.log('child',child)
+                    dg(child)
+                }
+            }
+            else{
+                if(replace){
+
+                }
+                else{
+                    thisNode.remove()
+                }
+            }
+        }
+        dg($('html')[0])
+        console.log('clear ok')
     }
 
     transId2Name() {
@@ -190,7 +291,7 @@ class html2enml {
     transCheck2Todo() {
         $('input[type="checkbox"]').each(function () {
             let $t = $(this);
-            console.log($t);
+            //console.log($t);
             let todo = $('<en-todo/>');
 
             $t.after(todo);
@@ -205,6 +306,27 @@ class html2enml {
         });
     }
 
+    transHtml2Canvas(selector,callback) {
+        let selected=$(selector);
+        let count=0;
+        selected.each(function () {
+            let it = $(this);
+
+            html2canvas($(this)[0], {
+                onrendered: function (canvas) {
+                    // canvas is the final rendered <canvas> element
+                    it.empty();
+                    it.append(canvas);
+                    count++;
+                    if(count>=selected.length){
+                        callback()
+                    }
+                }
+            });
+        });
+
+    }
+
     getBase64Image(img) {
         let canvas = document.createElement("canvas");
         canvas.width = img.width;
@@ -216,10 +338,10 @@ class html2enml {
         let dataURL = canvas.toDataURL("image/png");
         return dataURL;
 
-         //return dataURL.replace("data:image/png;base64,", "");
+        //return dataURL.replace("data:image/png;base64,", "");
     }
 
 }
 
-
+window.html2enml = html2enml;
 export default html2enml
