@@ -16,9 +16,9 @@
         <script type="text/javascript"
                 src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
-<script src="./dest/js/highlight.pack.js"></script>
+<script src="../dest/js/highlight.pack.js"></script>
 
-<script src="./dest/js/html2enml.js"></script>
+<script src="../dest/js/html2enml.js"></script>
 
     <script type="text/javascript">
         var h2e=new html2enml();
@@ -47,6 +47,8 @@
                     h2e.transBody();
                     // 清除所有不符合规则的内容
                     h2e.clearAllUnAllow();
+
+                    console.log('全部完毕')
                 });
         }, 0)
         }

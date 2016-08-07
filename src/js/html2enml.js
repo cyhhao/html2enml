@@ -238,7 +238,7 @@ class html2enml {
                 //console.log('pass')
                 for(let i=0;i<node.attributes.length;i++){
                     let attr=node.attributes[i];
-                    if(that.allowAtclearAllUnAllowtrs.indexOf(attr.name.toLowerCase())>=0){
+                    if(that.allowAttrs.indexOf(attr.name.toLowerCase())>=0){
 
                     }
                     else{
@@ -259,7 +259,7 @@ class html2enml {
                 }
             }
         }
-        dg($('html')[0])
+        dg($('html')[0]);
         console.log('clear ok')
     }
 
